@@ -1,4 +1,4 @@
-const db = require('./src/db');
+const db = require('../src/db');
 const now = new Date().toISOString();
 
 for (let i = 1; i <= 30; i++) {

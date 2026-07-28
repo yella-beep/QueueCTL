@@ -1,4 +1,4 @@
-const claimNextJob = require('./src/claim');
+const claimNextJob = require('../src/claim');
 
 const claimed = [];
 for (let i = 0; i < 10; i++) {

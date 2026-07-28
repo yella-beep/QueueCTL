@@ -1,4 +1,4 @@
-const claimNextJob = require('./src/claim');
+const claimNextJob = require('../src/claim');
 
 const workerId = process.argv[2] || 'worker-x';
 const claimed = [];
