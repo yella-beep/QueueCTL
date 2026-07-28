@@ -9,10 +9,11 @@ const statusCommand = require('../src/commands/status');
 const { configSetCommand, configGetCommand } = require('../src/commands/config');
 
 program
-  .command('enqueue [json]')
+  .command('enqueue [json...]')
   .option('--file <path>', 'read job JSON from a file instead of the command line')
-  .action((json, options) => {
-    enqueueCommand(json, options);
+  .action((jsonParts, options) => {
+    const jsonStr = (jsonParts && jsonParts.length > 0) ? jsonParts.join(' ') : undefined;
+    enqueueCommand(jsonStr, options);
   });
 
 program
@@ -48,8 +49,17 @@ const worker = new Command('worker').description('Manage workers');
 
 worker
   .command('start')
-  .action(() => {
-    runWorker(`worker-${process.pid}`);
+  .option('--count <n>', 'number of workers to start', parseInt)
+  .action((options) => {
+    const count = options.count || 1;
+    if (count === 1) {
+      runWorker(`worker-${process.pid}`);
+    } else {
+      const { fork } = require('child_process');
+      for (let i = 0; i < count; i++) {
+        fork(__filename, ['worker', 'start']);
+      }
+    }
   });
 
 worker
