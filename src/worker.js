@@ -1,18 +1,40 @@
 const { spawn } = require('child_process');
+const fs = require('fs');
+const path = require('path');
 const claimNextJob = require('./claim');
 const db = require('./db');
 const markCompleted = require('./jobLifecycle').markCompleted;
 const markFailedOrDead = require('./jobLifecycle').markFailedOrDead;
 const reapStaleJobs = require('./reaper');
 
+const pidDir = path.join(__dirname, '..', '.queuectl');
+const pidFilePath = (workerId) => path.join(pidDir, `${workerId}.pid`);
+
+function writePidFile(workerId) {
+  if (!fs.existsSync(pidDir)) {
+    fs.mkdirSync(pidDir, { recursive: true });
+  }
+  fs.writeFileSync(pidFilePath(workerId), String(process.pid));
+}
+
+function removePidFile(workerId) {
+  try {
+    fs.unlinkSync(pidFilePath(workerId));
+  } catch (err) {
+    // already gone, fine
+  }
+}
+
 const POLL_INTERVAL_MS = 500;
 const HEARTBEAT_INTERVAL_MS = 5000;
 const REAPER_CHECK_INTERVAL_MS = 5000;
 
 let shuttingDown = false;
+let currentWorkerId = null;
 
 process.on('SIGTERM', () => { shuttingDown = true; });
 process.on('SIGINT', () => { shuttingDown = true; });
+process.on('exit', () => { if (currentWorkerId) removePidFile(currentWorkerId); });
 
 function touchHeartbeat(jobId) {
   db.prepare(`UPDATE jobs SET heartbeat_at = ? WHERE id = ?`)
@@ -43,14 +65,25 @@ function sleep(ms) {
 }
 
 async function runWorker(workerId) {
-  console.error(`${workerId} started`);
+  currentWorkerId = workerId;
+  writePidFile(workerId);
+  console.error(`${workerId} started (pid ${process.pid})`);
 
   let lastReapCheck = 0;
+  const stopFilePath = path.join(pidDir, `${workerId}.pid.stop`);
 
   while (!shuttingDown) {
     if (Date.now() - lastReapCheck > REAPER_CHECK_INTERVAL_MS) {
       reapStaleJobs();
       lastReapCheck = Date.now();
+    }
+
+    // Check for stop flag file immediately before claiming next job
+    if (fs.existsSync(stopFilePath)) {
+      fs.unlinkSync(stopFilePath);
+      console.error(`${workerId} detected stop flag, shutting down`);
+      shuttingDown = true;
+      break;
     }
 
     const job = claimNextJob(workerId);
@@ -70,6 +103,7 @@ async function runWorker(workerId) {
     }
   }
 
+  removePidFile(workerId);
   console.error(`${workerId} shut down gracefully`);
 }
 
