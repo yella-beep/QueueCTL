@@ -1,8 +1,4 @@
 const runWorker = require('../src/worker');
 
-// Run worker for 15 seconds then exit (to allow retry delays)
-setTimeout(() => {
-  process.exit(0);
-}, 15000);
-
+// Run worker indefinitely (for crash recovery test)
 runWorker('test-worker');
