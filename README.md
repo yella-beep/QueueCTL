@@ -111,6 +111,4 @@ having code generated wholesale without understanding it.
 - Config changes to `max-retries` only affect newly enqueued jobs (stored per-job at
   enqueue time); `backoff-base` changes apply retroactively to jobs already in progress.
 
-## Time Spent
-
-15 hours
+ 
