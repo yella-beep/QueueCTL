@@ -43,8 +43,7 @@ function touchHeartbeat(jobId) {
 
 function runJob(job) {
   return new Promise((resolve) => {
-    const child = spawn(job.command, { shell: true, stdio: 'ignore', detached: true });
-    child.unref();
+    const child = spawn(job.command, { shell: true, stdio: 'ignore' });
 
     const hbInterval = setInterval(() => touchHeartbeat(job.id), HEARTBEAT_INTERVAL_MS);
 
