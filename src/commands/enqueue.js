@@ -24,6 +24,7 @@ function enqueueCommand(input, options = {}) {
   }
 
   const now = new Date().toISOString();
+  const { getConfig } = require('../config');
 
   db.prepare(`
     INSERT INTO jobs (id, command, state, attempts, max_retries, created_at, updated_at)
@@ -31,7 +32,7 @@ function enqueueCommand(input, options = {}) {
   `).run(
     job.id,
     job.command,
-    job.max_retries ?? 3,
+    job.max_retries ?? getConfig('max-retries'),
     now,
     now
   );
