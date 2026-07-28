@@ -79,16 +79,24 @@ function enqueueCommand(input, options = {}) {
   const now = new Date().toISOString();
   const { getConfig } = require('../config');
 
-  db.prepare(`
-    INSERT INTO jobs (id, command, state, attempts, max_retries, created_at, updated_at)
-    VALUES (?, ?, 'pending', 0, ?, ?, ?)
-  `).run(
-    job.id,
-    job.command,
-    maxRetriesVal ?? getConfig('max-retries'),
-    now,
-    now
-  );
+  try {
+    db.prepare(`
+      INSERT INTO jobs (id, command, state, attempts, max_retries, created_at, updated_at)
+      VALUES (?, ?, 'pending', 0, ?, ?, ?)
+    `).run(
+      job.id,
+      job.command,
+      maxRetriesVal ?? getConfig('max-retries'),
+      now,
+      now
+    );
+  } catch (err) {
+    if (err.code === 'SQLITE_CONSTRAINT_PRIMARYKEY' || err.message.includes('UNIQUE constraint failed')) {
+      console.error(`Error: job with ID "${job.id}" already exists`);
+      process.exit(1);
+    }
+    throw err;
+  }
 
   console.error(`Job ${job.id} enqueued.`);
 }
