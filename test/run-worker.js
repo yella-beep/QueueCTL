@@ -1,8 +1,8 @@
 const runWorker = require('../src/worker');
 
-// Run worker for 10 seconds then exit
+// Run worker for 15 seconds then exit (to allow retry delays)
 setTimeout(() => {
   process.exit(0);
-}, 10000);
+}, 15000);
 
 runWorker('test-worker');
