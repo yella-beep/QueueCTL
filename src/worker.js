@@ -43,7 +43,11 @@ function touchHeartbeat(jobId) {
 
 function runJob(job) {
   return new Promise((resolve) => {
+    // Note: detached: true is intentionally removed since OS cleanup is better where available,
+    // but we still explicitly kill orphaned processes via claimed_pid in the reaper.
     const child = spawn(job.command, { shell: true, stdio: 'ignore' });
+    
+    db.prepare(`UPDATE jobs SET claimed_pid = ? WHERE id = ?`).run(child.pid, job.id);
 
     const hbInterval = setInterval(() => touchHeartbeat(job.id), HEARTBEAT_INTERVAL_MS);
 

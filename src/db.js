@@ -14,7 +14,8 @@ db.exec(`
     updated_at TEXT NOT NULL,
     next_retry_at TEXT,        -- when a 'failed' job becomes eligible again
     claimed_by TEXT,           -- worker id/pid that owns it while 'processing'
-    heartbeat_at TEXT          -- last time the owning worker proved it's alive
+    heartbeat_at TEXT,         -- last time the owning worker proved it's alive
+    claimed_pid INTEGER        -- OS PID of the spawned child process for orphan cleanup
   );
 
   CREATE TABLE IF NOT EXISTS config (
