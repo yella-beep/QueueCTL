@@ -28,6 +28,11 @@ where `job.json` looks like:
 ```json
 {"id": "job1", "command": "echo hello", "max_retries": 3}
 ```
+You can also enqueue inline JSON directly:
+```powershell
+queuectl enqueue '{"id": "job1", "command": "echo hello"}'
+```
+*Note for Windows Command Prompt (`cmd.exe`): Command Prompt does not support single quotes `'` for strings and will strip internal double quotes. `queuectl` includes a built-in relaxed parser to automatically reconstruct the JSON in this case, allowing you to run the exact same command in CMD without errors.*
 
 **Start workers (foreground, blocks until stopped):**
 ```powershell
