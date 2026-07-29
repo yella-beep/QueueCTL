@@ -101,6 +101,7 @@ async function runWorker(workerId) {
 
     if (success) {
       markCompleted(job.id);
+      console.error(`  → job ${job.id} completed successfully`);
     } else {
       markFailedOrDead(job);
     }
