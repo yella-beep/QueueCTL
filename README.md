@@ -93,9 +93,6 @@ All 5 required scenarios were manually verified during development:
 
 Test scripts used during development are in `test/`.
 
-## AI Usage Note
-
-I used Claude extensively throughout this project — for planning the overall architecture and file structure, working through the atomic-locking design, debugging PowerShell-specific issues (quoting, signal handling differences on Windows), and reviewing my own test results before trusting them. All core logic was written and understood by me; AI assistance was used for design discussion, debugging guidance, and reviewing test methodology rather than having code generated wholesale without understanding it.
 
 ## Known Limitations
 
